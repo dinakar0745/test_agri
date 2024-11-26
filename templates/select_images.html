@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Images for Case ID: {{ case_id }}</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            margin-top: 60px; /* Adjusted to make room for the logout button */
+        }
+
+        h1 {
+            color: #444;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #555;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        /* Image grid styling */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            justify-items: center;
+        }
+
+        .image-item {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;/*fill, contain, scale-down, cover*/
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-item p {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #555555;
+        }
+
+        .image-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-item.selected img {
+            border: 2px solid rgb(54, 204, 0); /* Change color as desired */
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(54, 204, 0, 0.4);
+            opacity: 0.7; /* Optional: make selected images slightly transparent */
+        }
+
+        /* Submit button styling */
+        button {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            border: none;
+            padding: 12px 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Admin and Logout buttons */
+        .logout-button {
+            position: absolute;
+            top: 0px;
+            right: 20px;
+        }
+
+        .logout-button button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .logout-button button:hover {
+            background-color: #8d0d1a;
+        }
+
+        .admin-button {
+            position: absolute;
+            top: 0px;
+            left: 20px;
+        }
+
+        .admin-button button {
+            background-color: #33b249;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            
+        }
+
+        .admin-button a {
+            display: inline-block;
+            text-decoration: none;
+        }
+
+
+
+        .admin-button button:hover {
+            background-color: #088c1e;
+        }
+
+        .admin-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .admin-buttons a {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .admin-buttons a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 20px;
+            }
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            .image-item img {
+                height: 80px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back to Submit Solution button -->
+        <div class="admin-button">
+            <a href="{{ url_for('submit_solution', case_id=case_id) }}">
+                <button>Back to Submit Solution</button>
+            </a>
+        </div>
+
+
+        <!-- Logout button -->
+        <div class="logout-button">
+            <a href="{{ url_for('logout') }}">
+                <button>Logout</button>
+            </a>
+        </div>
+
+        <h1>Select Images for Case ID: {{ case_id }}</h1>
+
+        <form method="POST" id="imageForm">
+            {% if images %}
+                <div>
+                    <h3>Available Images</h3>
+                    <div class="image-grid">
+                        {% for image in images %}
+                            <div class="image-item" data-image-url="{{ image }}" onclick="toggleSelection(this)">
+                                <img src="{{ image }}" alt="Image">
+                                <p>{{ image.split('/')[-1] }}</p> <!-- Display only the image file name -->
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <p>No images found for Case ID {{ case_id }}</p>
+            {% endif %}
+            <!-- Hidden input to store selected images -->
+            <input type="hidden" name="selected_images" id="selectedImages">
+        
+            <!-- Submit and Delete buttons -->
+            <button type="submit" name="action" value="submit">Submit Selected Images</button>
+            <button type="submit" name="action" value="delete">Delete Selected Images</button>
+        </form>
+        
+
+        <!-- {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %} -->
+    
+    </div>
+
+    <script>
+        let selectedImages = [];
+    
+        function toggleSelection(imageElement) {
+            const imageUrl = imageElement.getAttribute('data-image-url');
+            const index = selectedImages.indexOf(imageUrl);
+    
+            if (index === -1) {
+                // Add image to selected images array
+                selectedImages.push(imageUrl);
+                imageElement.classList.add('selected');
+            } else {
+                // Remove image from selected images array
+                selectedImages.splice(index, 1);
+                imageElement.classList.remove('selected');
+            }
+    
+            // Update the hidden input field with selected images
+            document.getElementById('selectedImages').value = selectedImages.join(',');
+        }
+    </script>
+    
+</body>
+</html>

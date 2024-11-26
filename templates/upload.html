@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .upload-box {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            position: relative;
+        }
+        .upload-box:hover {
+            border-color: #007BFF;
+        }
+        .upload-box input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .logout-button button {
+            background-color: #dc3545;
+        }
+        .logout-button button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logout button -->
+    <div class="logout-button">
+        <a href="{{ url_for('logout') }}"><button>Logout</button></a>
+    </div>
+    
+    <div class="container">
+        <h1>Upload PDF</h1>
+        <form id="uploadForm" action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title" placeholder="Enter document title" required><br><br>
+            <div class="upload-box" id="uploadBox">
+                <label for="file">Drag & Drop your PDF file here or click to select:</label><br>
+                <input type="file" id="file" name="file" accept=".pdf" required>
+            </div>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const uploadBox = document.getElementById('uploadBox');
+        const uploadForm = document.getElementById('uploadForm');
+
+        // Highlight upload box when dragging files
+        uploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Prevent default to allow drop
+            uploadBox.style.borderColor = '#007BFF'; // Highlight on dragover
+        });
+
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.style.borderColor = '#ccc'; // Remove highlight on drag leave
+        });
+
+        // Handle the drop event
+        uploadBox.addEventListener('drop', (e) => {
+            e.preventDefault(); // Prevent the default drop behavior
+            const files = e.dataTransfer.files; // Get dropped files
+            if (files.length > 0) {
+                const file = files[0];
+                
+                // Check if the dropped file is a PDF
+                if (file.type === 'application/pdf') {
+                    fileInput.files = files; // Assign the valid PDF file to the input
+                    uploadBox.style.borderColor = '#ccc'; // Remove highlight
+                    
+                    // Optional: If you want to auto-submit the form after drop
+                    uploadForm.submit(); // Auto-submit form
+                } else {
+                    alert('Only PDF files are allowed!'); // Alert if the file is not a PDF
+                    uploadBox.style.borderColor = '#dc3545'; // Highlight in red for error
+                }
+            }
+        });
+
+        // Allow clicking the box to select files
+        uploadBox.addEventListener('click', () => {
+            fileInput.click(); // Trigger file input click
+        });
+    </script>
+</body>
+</html>
